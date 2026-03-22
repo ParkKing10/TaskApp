@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: task-system
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: DB_PATH
+        value: /opt/render/project/data/data.db
+    disk:
+      name: task-data
+      mountPath: /opt/render/project/data
+      sizeGB: 1

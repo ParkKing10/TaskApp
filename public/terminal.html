@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Aufgaben Terminal</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◆</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a26;--surface3:#22222f;
+--border:#2a2a3a;--border-light:#3a3a4f;
+--text:#e8e8f0;--text-muted:#8888a0;
+--accent:#4f8cff;--accent-glow:#4f8cff33;--accent-soft:#4f8cff18;
+--green:#22c55e;--green-glow:#22c55e33;--green-soft:#22c55e15;
+--red:#ef4444;--red-soft:#ef444418;
+--orange:#f59e0b;--orange-soft:#f59e0b18;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;
+  -webkit-user-select:none;user-select:none; /* prevent text selection on tablet */
+}
+
+/* Disable right click & long press context menu */
+body{-webkit-touch-callout:none}
+
+.screen{height:100vh;display:flex;flex-direction:column}
+
+/* ─── PIN SCREEN ─── */
+.pin-screen{display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg)}
+.pin-box{text-align:center;width:340px}
+.pin-box .logo{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--accent);letter-spacing:2px;margin-bottom:6px}
+.pin-box .sub{font-size:13px;color:var(--text-muted);margin-bottom:32px}
+.pin-dots{display:flex;gap:16px;justify-content:center;margin-bottom:32px}
+.pin-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border-light);transition:all .15s}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow)}
+.pin-dot.error{background:var(--red);border-color:var(--red);animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:280px;margin:0 auto}
+.num-btn{width:80px;height:80px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:28px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s;-webkit-tap-highlight-color:transparent}
+.num-btn:active{background:var(--accent);border-color:var(--accent);color:#fff;transform:scale(.95)}
+.num-btn.fn{font-size:14px;font-weight:500;color:var(--text-muted);border-color:transparent;background:transparent}
+.num-btn.fn:active{background:var(--surface2);color:var(--text)}
+.clock{font-family:'JetBrains Mono',monospace;font-size:48px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:2px}
+.date-display{font-size:14px;color:var(--text-muted);margin-bottom:36px}
+
+/* ─── TASK SCREEN ─── */
+.task-header{padding:20px 24px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.task-header .emp-name{font-size:18px;font-weight:700}
+.task-header .emp-meta{font-size:12px;color:var(--text-muted);margin-top:2px}
+.task-header .hours-box{text-align:right}
+.task-header .hours-val{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--green)}
+.task-header .hours-label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)}
+.back-btn{padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.back-btn:active{background:var(--surface3)}
+
+.task-body{flex:1;overflow-y:auto;padding:24px;-webkit-overflow-scrolling:touch}
+.section-label{font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;margin-top:20px}
+.section-label:first-child{margin-top:0}
+.section-label.orange{color:var(--orange)}
+.section-label.red{color:var(--red)}
+.section-label.green{color:var(--green)}
+
+.task-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:16px;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.task-check{width:36px;height:36px;border-radius:10px;border:2px solid var(--border-light);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:2px}
+.task-check:active{transform:scale(.9)}
+.task-check.checked{background:var(--green);border-color:var(--green);box-shadow:0 0 12px var(--green-glow)}
+.task-check.checked svg{display:block}
+.task-check svg{display:none;width:20px;height:20px;color:#fff}
+.task-info{flex:1}
+.task-title{font-weight:600;font-size:16px;margin-bottom:4px}
+.task-desc{font-size:13px;color:var(--text-muted);margin-bottom:8px}
+.task-meta{font-size:12px;color:var(--text-muted);display:flex;gap:12px;flex-wrap:wrap}
+.task-penalty{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--red);font-weight:600}
+.badge{display:inline-flex;font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px}
+.badge.overdue{background:var(--red-soft);color:var(--red)}
+.task-card.completed{opacity:.4}
+.task-card.completed .task-title{text-decoration:line-through}
+
+.no-tasks{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.no-tasks .icon{font-size:48px;margin-bottom:12px}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface);border:1px solid rgba(34,197,94,.3);color:var(--green);padding:14px 28px;border-radius:12px;font-size:14px;font-weight:600;z-index:200;opacity:0;transition:all .3s;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.error{border-color:rgba(239,68,68,.3);color:var(--red)}
+
+/* Auto-logout timer bar */
+.timer-bar{height:3px;background:var(--accent);transition:width 1s linear;position:absolute;bottom:0;left:0;border-radius:0 2px 0 0}
+</style>
+</head>
+<body oncontextmenu="return false">
+
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG ───
+const AUTO_LOGOUT_SECONDS = 120; // auto back to PIN screen after 2 min inactivity
+
+// ─── API ───
+const API = {
+  token: null,
+  user: null,
+  async request(method, url, body) {
+    const opts = { method, headers: {'Content-Type':'application/json'} };
+    if (this.token) opts.headers['X-Auth-Token'] = this.token;
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(url, opts);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Fehler');
+    return data;
+  },
+  get: (u) => API.request('GET', u),
+  post: (u, b) => API.request('POST', u, b),
+  put: (u, b) => API.request('PUT', u, b),
+};
+
+let state = { view: 'pin', pin: '', tasks: [], myStats: {}, pinError: false };
+let logoutTimer = null;
+let logoutRemaining = AUTO_LOGOUT_SECONDS;
+
+function toast(msg, err) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err ? ' error' : '');
+  setTimeout(() => t.className = 'toast', 2500);
+}
+
+// ─── CLOCK ───
+function getTime() {
+  const now = new Date();
+  return now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+}
+function getDate() {
+  return new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+// ─── AUTO LOGOUT ───
+function resetLogoutTimer() {
+  clearInterval(logoutTimer);
+  logoutRemaining = AUTO_LOGOUT_SECONDS;
+  logoutTimer = setInterval(() => {
+    logoutRemaining--;
+    if (logoutRemaining <= 0) {
+      doLogout();
+    }
+  }, 1000);
+}
+
+function doLogout() {
+  clearInterval(logoutTimer);
+  if (API.token) {
+    API.post('/api/logout').catch(() => {});
+  }
+  API.token = null;
+  API.user = null;
+  state = { view: 'pin', pin: '', tasks: [], myStats: {}, pinError: false };
+  render();
+}
+
+// ─── RENDER ───
+function render() {
+  const app = document.getElementById('app');
+  if (state.view === 'pin') {
+    app.innerHTML = renderPinScreen();
+    bindPinEvents();
+    startClock();
+  } else {
+    app.innerHTML = renderTaskScreen();
+    bindTaskEvents();
+  }
+}
+
+// ─── PIN SCREEN ───
+let clockInterval;
+function startClock() {
+  clearInterval(clockInterval);
+  updateClock();
+  clockInterval = setInterval(updateClock, 10000);
+}
+function updateClock() {
+  const el = document.getElementById('clock');
+  const del = document.getElementById('dateDisplay');
+  if (el) el.textContent = getTime();
+  if (del) del.textContent = getDate();
+}
+
+function renderPinScreen() {
+  const dots = [0,1,2,3].map(i =>
+    `<div class="pin-dot ${i < state.pin.length ? (state.pinError ? 'error' : 'filled') : ''}"></div>`
+  ).join('');
+
+  return `<div class="pin-screen">
+    <div class="pin-box">
+      <div class="clock" id="clock">${getTime()}</div>
+      <div class="date-display" id="dateDisplay">${getDate()}</div>
+      <div class="logo">◆ TASK TERMINAL</div>
+      <div class="sub">PIN eingeben zum Anmelden</div>
+      <div class="pin-dots">${dots}</div>
+      <div class="numpad">
+        <div class="num-btn" data-num="1">1</div>
+        <div class="num-btn" data-num="2">2</div>
+        <div class="num-btn" data-num="3">3</div>
+        <div class="num-btn" data-num="4">4</div>
+        <div class="num-btn" data-num="5">5</div>
+        <div class="num-btn" data-num="6">6</div>
+        <div class="num-btn" data-num="7">7</div>
+        <div class="num-btn" data-num="8">8</div>
+        <div class="num-btn" data-num="9">9</div>
+        <div class="num-btn fn" data-num="clear">Löschen</div>
+        <div class="num-btn" data-num="0">0</div>
+        <div class="num-btn fn" data-num="back">←</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function handlePinInput(num) {
+  if (state.pinError) {
+    state.pin = '';
+    state.pinError = false;
+  }
+
+  if (num === 'clear') { state.pin = ''; render(); return; }
+  if (num === 'back') { state.pin = state.pin.slice(0, -1); render(); return; }
+
+  state.pin += num;
+  render();
+
+  if (state.pin.length === 4) {
+    try {
+      const data = await API.post('/api/login/employee', { pin: state.pin });
+      API.token = data.token;
+      API.user = { id: data.id, name: data.name };
+      state.view = 'tasks';
+      await loadTasks();
+      render();
+      resetLogoutTimer();
+      toast('Hallo, ' + data.name + '!');
+    } catch (e) {
+      state.pinError = true;
+      render();
+      toast('PIN nicht gefunden!', true);
+      setTimeout(() => { state.pin = ''; state.pinError = false; render(); }, 800);
+    }
+  }
+}
+
+function bindPinEvents() {
+  document.querySelectorAll('.num-btn').forEach(btn => {
+    btn.addEventListener('click', () => handlePinInput(btn.dataset.num));
+  });
+}
+
+// ─── TASK SCREEN ───
+async function loadTasks() {
+  try {
+    const [tasks, myStats] = await Promise.all([
+      API.get('/api/tasks'),
+      API.get('/api/my-stats'),
+    ]);
+    state.tasks = tasks;
+    state.myStats = myStats;
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+function renderTaskScreen() {
+  const s = state.myStats;
+  const open = state.tasks.filter(t => t.status === 'open');
+  const overdue = state.tasks.filter(t => t.status === 'overdue');
+  const done = state.tasks.filter(t => t.status === 'done');
+  const hasAny = open.length + overdue.length + done.length > 0;
+
+  return `<div class="screen">
+    <div class="task-header" style="position:relative">
+      <div>
+        <div class="emp-name">${esc(s.name || API.user.name)}</div>
+        <div class="emp-meta">${esc(s.role || '')} · ${open.length} offene Aufgaben</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="hours-box">
+          <div class="hours-val">${s.effective_hours || 0}h</div>
+          <div class="hours-label">Effektiv${s.total_deductions > 0 ? ' (-'+s.total_deductions+'h)' : ''}</div>
+        </div>
+        <button class="back-btn" id="logoutBtn">Abmelden</button>
+      </div>
+      <div class="timer-bar" id="timerBar" style="width:100%"></div>
+    </div>
+    <div class="task-body">
+      ${!hasAny ? `<div class="no-tasks"><div class="icon">✓</div>Keine Aufgaben vorhanden</div>` : ''}
+
+      ${overdue.length > 0 ? `<div class="section-label red">⚠ ÜBERFÄLLIG</div>${overdue.map(t => taskCardHTML(t, false, true)).join('')}` : ''}
+
+      ${open.length > 0 ? `<div class="section-label orange">⚡ OFFENE AUFGABEN</div>${open.map(t => taskCardHTML(t)).join('')}` : ''}
+
+      ${done.length > 0 ? `<div class="section-label green">✓ ERLEDIGT</div>${done.map(t => taskCardHTML(t, true)).join('')}` : ''}
+    </div>
+  </div>`;
+}
+
+function taskCardHTML(t, completed, isOverdue) {
+  return `<div class="task-card ${completed ? 'completed' : ''}">
+    <div class="task-check ${completed ? 'checked' : ''}" ${completed ? '' : `data-complete="${t.id}"`}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
+    </div>
+    <div class="task-info">
+      <div class="task-title">${esc(t.title)}</div>
+      ${t.description ? `<div class="task-desc">${esc(t.description)}</div>` : ''}
+      <div class="task-meta">
+        <span>Deadline: ${t.deadline}</span>
+        <span class="task-penalty">Abzug: -${t.penalty_hours}h</span>
+        ${isOverdue ? '<span class="badge overdue">Überfällig!</span>' : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function bindTaskEvents() {
+  // Complete task
+  document.querySelectorAll('[data-complete]').forEach(el => {
+    el.addEventListener('click', async () => {
+      resetLogoutTimer();
+      const id = el.dataset.complete;
+      try {
+        await API.put('/api/tasks/' + id + '/status', { status: 'done' });
+        await loadTasks();
+        render();
+        toast('Aufgabe erledigt! ✓');
+      } catch (e) { toast(e.message, true); }
+    });
+  });
+
+  // Logout
+  const lb = document.getElementById('logoutBtn');
+  if (lb) lb.addEventListener('click', doLogout);
+
+  // Any touch resets timer
+  document.addEventListener('touchstart', resetLogoutTimer, { passive: true });
+  document.addEventListener('click', resetLogoutTimer);
+
+  // Timer bar animation
+  updateTimerBar();
+}
+
+function updateTimerBar() {
+  const bar = document.getElementById('timerBar');
+  if (!bar || state.view !== 'tasks') return;
+  const pct = (logoutRemaining / AUTO_LOGOUT_SECONDS) * 100;
+  bar.style.width = pct + '%';
+  if (pct < 25) bar.style.background = 'var(--red)';
+  else if (pct < 50) bar.style.background = 'var(--orange)';
+  else bar.style.background = 'var(--accent)';
+  requestAnimationFrame(() => setTimeout(updateTimerBar, 1000));
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+// ─── PREVENT NAVIGATION ───
+window.addEventListener('beforeunload', (e) => { e.preventDefault(); });
+history.pushState(null, '', location.href);
+window.addEventListener('popstate', () => {
+  history.pushState(null, '', location.href);
+});
+
+// ─── INIT ───
+render();
+</script>
+</body>
+</html>
